@@ -1,29 +1,30 @@
 # This will read stream data from the public endpoints by default, but that might be a lot slower
 # than reading data locally.
-export MODEL_SIZE="tiny" # tiny or 7B
+export MODEL_SIZE=tiny # tiny or 7B
 export DATA_ROOT="http://flexolmo-data.org"
 export CHECKPOINTS=checkpoints  # /path/to/checkpoints
+export NPROC_PER_NODE=6
 
 # Train base model on public mix for 1T tokens (schedule set to 5T)
-torchrun --nproc-per-node=8 ./src/scripts/train/OLMo2-${MODEL_SIZE}-train.py OLMo2-${MODEL_SIZE}-public-mix \
+torchrun --nproc-per-node=${NPROC_PER_NODE} ./src/scripts/train/OLMo2-train.py ${MODEL_SIZE} OLMo2-${MODEL_SIZE}-public-mix \
     --dataset.mix_base_dir=${DATA_ROOT} \
     --dataset.mix=public_mix \
     --train_module.float8_config.enabled=true \
-    --trainer.duration.value=5_000_000_000_000 \
-    --trainer.duration.unit=tokens \
+    --trainer.max_duration.value=5_000_000_000_000 \
+    --trainer.max_duration.unit=tokens \
     --trainer.hard_stop.value=1_000_000_000_000 \
     --trainer.hard_stop.unit=tokens \
     --trainer.save_folder=${CHECKPOINTS}/OLMo2-${MODEL_SIZE}-public-mix
-
+exit
 # Anneal for 50B tokens, using the checkpoint from the base model training.
 # Make sure to set the correct path to the checkpoint.
 BASE_CHECKPOINT=${CHECKPOINTS}/OLMo2-${MODEL_SIZE}-public-mix/step238419
-torchrun --nproc-per-node=8 ./src/scripts/train/OLMo2-anneal.py OLMo2-${MODEL_SIZE}-anneal-public-mix ${BASE_CHECKPOINT}
+torchrun --nproc-per-node=${NPROC_PER_NODE} ./src/scripts/train/OLMo2-anneal.py OLMo2-${MODEL_SIZE}-anneal-public-mix ${BASE_CHECKPOINT}
     --dataset.mix_base_dir=${DATA_ROOT} \
     --dataset.mix=public_mix \
     --train_module.float8_config.enabled=true \
-    --trainer.duration.value=50_000_000_000\
-    --trainer.duration.unit=tokens \
+    --trainer.max_duration.value=50_000_000_000\
+    --trainer.max_duration.unit=tokens \
     --trainer.save_folder=${CHECKPOINTS}/OLMo2-7B-anneal-public-mix
 
 # Unshard the final checkpoint
