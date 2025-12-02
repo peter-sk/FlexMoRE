@@ -105,7 +105,6 @@ if __name__ == "__main__":
     key2usvh = {}
     for rank, alpha in zip(args.rank, args.alpha):
         for key in list(moe_state_dict.keys()):
-            log.info(f"Processing key {key}")
             assert expert_state_dict[key].shape == moe_state_dict[key].shape, f"Shape mismatch for key {key}: {expert_state_dict[key].shape} vs {moe_state_dict[key].shape}"
             if "expert" in key:
                 # bp()
@@ -118,9 +117,11 @@ if __name__ == "__main__":
                 if any(
                     lora_module in key for lora_module in args.lora_modules
                 ):
+                    log.info(f"Processing key {key}")
                     delta_expert = ft_expert - base_expert
                     # compute the low-rank adaptation
                     if key not in key2usvh:
+                        log.info(f"Computing SVD for key {key}")
                         key2usvh[key] = torch.linalg.svd(delta_expert, full_matrices=False)
                     u, s, vh = key2usvh[key]
                     lora_u = u[:, :rank]
