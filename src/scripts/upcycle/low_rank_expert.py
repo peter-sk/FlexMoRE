@@ -44,16 +44,14 @@ def parse_args() -> argparse.Namespace:
         "-r",
         "--rank",
         type=int,
-        default=[8192,16384],
-#        default=[1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384],
+        default=[1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384],
         help="Rank for the low-rank adapters to be applied to each linear layer",
     )
     parser.add_argument(
         "-a",
         "--alpha",
         nargs="+",
-        default=[16384,32768],
-#        default=[2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768],
+        default=[2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768],
         help="Alpha (scaling factor) for the low-rank adapters to be applied to each linear layer",
     )
     parser.add_argument(
