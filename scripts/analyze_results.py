@@ -46,6 +46,10 @@ def parse_results_file(filepath):
                 model_type = 'Flex-news'
             elif 'Flex-reddit' in model_name:
                 model_type = 'Flex-reddit'
+            elif 'Flex-pes2o' in model_name:
+                model_type = 'Flex-pes2o'
+            elif 'Flex-math' in model_name:
+                model_type = 'Flex-math'
             elif 'FlexOlmo' in model_name:
                 model_type = 'FlexOlmo'
             else:
@@ -78,12 +82,12 @@ def calculate_statistics(df):
 
 def plot_rank_vs_performance(df, output_dir):
     """Plot how rank affects overall performance for each model type."""
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig, axes = plt.subplots(3, 3, figsize=(16, 12))
     axes = axes.flatten()
 
     model_types = df['model_type'].unique()
 
-    for idx, model_type in enumerate(model_types[:4]):
+    for idx, model_type in enumerate(model_types[:9]):
         if idx >= len(axes):
             break
 
@@ -234,9 +238,16 @@ def generate_summary_report(df, optimal_ranks, output_dir):
 
 def main():
     """Main analysis pipeline."""
+    import argparse
+    parser = argparse.ArgumentParser(description="Analyze FlexMoRE model results.")
+    parser.add_argument('resultsfile', type=str, default=None,
+                        help="Path to the results file.")
+    parser.add_argument('-o', '--output-dir', type=str, default='analysis_output',
+                        help="Path for output directory")
+    args = parser.parse_args()
     # Setup paths
-    results_file = Path(__file__).parent / 'first-results-2025-12-08.csv'
-    output_dir = Path(__file__).parent / 'analysis_output'
+    results_file = Path(args.resultsfile)
+    output_dir = Path(args.output_dir)
     output_dir.mkdir(exist_ok=True)
 
     print("=" * 80)
@@ -273,7 +284,7 @@ def main():
     generate_summary_report(df, optimal_ranks, output_dir)
 
     print("\n" + "=" * 80)
-    print("Analysis complete! Check the 'analysis_output' directory for results.")
+    print(f"Analysis complete! Check the '{args.output_dir}' directory for results.")
     print("=" * 80)
 
 if __name__ == '__main__':
